@@ -23,6 +23,11 @@ Run hyperparameter optimization with `optuna`:
 python -m src.model.training_optuna
 ```
 
+Evaluate resulting model and send to submission API with:
+```
+python -m src.model.evaluate --run_id 6aeebe13-4ca0-456f-9476-a956f738e598 --submit
+```
+
 # To-Do List
 List of to-do's, feel free to add new ones, or pick any of these up.
 - Implement config options for data processing
