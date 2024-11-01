@@ -55,8 +55,8 @@ def groupby_mean_impute(df: pd.DataFrame, groupby_col: str,
 def remove_unused_columns(df: pd.DataFrame) -> pd.DataFrame:
     # Remove some unused columns
     drop_cols = [
-        'BUILDING_ID', 'UNIT_ID',     # ID columns
-        'SQM_PRICE',                                    # pseudo-target column
+        'BUILDING_ID', 'UNIT_ID',   # ID columns
+        'SQM_PRICE',                # pseudo-target column
         'STREET_CODE'
     ]
     drop_cols = [x for x in drop_cols if x in df.columns]
