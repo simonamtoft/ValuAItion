@@ -13,8 +13,6 @@ Download dataset files:
 python -m src.data.download
 ```
 
-<!-- TODO: Add how-to preprocess / engineer data -->
-
 Run single model training using parameters from `model_config.json`:
 ```
 python -m src.model.training_single
