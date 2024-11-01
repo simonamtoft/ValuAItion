@@ -11,3 +11,4 @@ pillow==11.0.0
 python-dotenv==1.0.1
 optuna==4.0.0
 torch
+click==8.1.7
