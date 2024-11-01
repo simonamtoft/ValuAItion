@@ -30,7 +30,6 @@ python -m src.model.evaluate --run_id 6aeebe13-4ca0-456f-9476-a956f738e598 --sub
 
 # To-Do List
 List of to-do's, feel free to add new ones, or pick any of these up.
-- Implement config options for data processing
 - Implement hyperparameter optimization
 - Implement feature selection
 - Implement option to normalize numeric features
