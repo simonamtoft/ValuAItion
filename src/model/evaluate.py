@@ -72,8 +72,8 @@ def compute_metrics(model_dir: str):
 def upload_results(predictions: dict, model_dir: str):
     # load name and email from .env file
     load_dotenv(override=True)
-    submit_name = os.environ['SUBMIT_NAME']
-    submit_email = os.environ['SUBMIT_EMAIL']
+    submit_name = os.getenv('SUBMIT_NAME', None)
+    submit_email = os.getenv('SUBMIT_EMAIL', None)
     assert submit_name is not None, 'Please set SUBMIT_NAME in .env file.'
     assert submit_email is not None, 'Please set SUBMIT_EMAIL in .env file.'
 
