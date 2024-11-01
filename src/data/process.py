@@ -2,7 +2,8 @@ import os
 import pandas as pd
 from .transforms import zip_code_mapper, municipality_code_mapper, \
     transform_floor, facility_clean
-from .constants import AREA_COLUMNS, FACILITY_COLUMNS, DROP_COLUMNS
+from .constants import AREA_COLUMNS, FACILITY_COLUMNS, DROP_COLUMNS, \
+    CAT_COLUMNS
 
 
 def get_data(split: str) -> pd.DataFrame:
@@ -21,8 +22,7 @@ def get_data(split: str) -> pd.DataFrame:
     df = df.drop(['TRADE_DATE'], axis=1)
 
     # one-hot encode columns
-    one_hot_cols = ['ZIP_AREA', 'MUNICIPALITY'] + FACILITY_COLUMNS
-    df = pd.get_dummies(df, columns=one_hot_cols, dtype='int8')
+    df = pd.get_dummies(df, columns=CAT_COLUMNS, dtype='int8')
 
     # drop columns that are not for training anymore
     df = df.drop(['ZIP_CODE', 'MUNICIPALITY_CODE'], axis=1)
