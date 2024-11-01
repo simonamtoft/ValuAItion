@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from .transforms import zip_code_mapper, municipality_code_mapper, \
     transform_floor, facility_clean
-from .constants import AREA_COLUMNS, FACILITY_COLUMNS
+from .constants import AREA_COLUMNS, FACILITY_COLUMNS, DROP_COLUMNS
 
 
 def get_data(split: str) -> pd.DataFrame:
@@ -54,12 +54,7 @@ def groupby_mean_impute(df: pd.DataFrame, groupby_col: str,
 
 def remove_unused_columns(df: pd.DataFrame) -> pd.DataFrame:
     # Remove some unused columns
-    drop_cols = [
-        'BUILDING_ID', 'UNIT_ID',   # ID columns
-        'SQM_PRICE',                # pseudo-target column
-        'STREET_CODE'
-    ]
-    drop_cols = [x for x in drop_cols if x in df.columns]
+    drop_cols = [x for x in DROP_COLUMNS if x in df.columns]
     df = df.drop(drop_cols, axis=1)
 
     # set 'TRANSACTION_ID' to be the index
