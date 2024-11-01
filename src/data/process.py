@@ -1,0 +1,73 @@
+import os
+import pandas as pd
+from .transforms import zip_code_mapper, municipality_code_mapper, \
+    transform_floor, facility_clean
+from .constants import AREA_COLUMNS, FACILITY_COLUMNS
+
+
+def get_data(split: str) -> pd.DataFrame:
+    dataset_path = os.path.join(
+        'datasets', f'Resights_Hackathon_Ejerlejligheder_{split.upper()}.csv')
+    df = pd.read_csv(dataset_path, sep=',')
+    df = transform_values(df)
+    df = handle_missing_values(df)
+    df = remove_unused_columns(df)
+
+    # expand TRADE_DATE to year, month, and day of week
+    trade_dates = pd.to_datetime(df['TRADE_DATE'])
+    df['TRADE_YEAR'] = trade_dates.dt.year.values
+    df['TRADE_MONTH'] = trade_dates.dt.month.values
+    df['TRADE_DOW'] = trade_dates.dt.dayofweek.values
+    df = df.drop(['TRADE_DATE'], axis=1)
+
+    # one-hot encode columns
+    one_hot_cols = ['ZIP_AREA', 'MUNICIPALITY'] + FACILITY_COLUMNS
+    df = pd.get_dummies(df, columns=one_hot_cols, dtype='int8')
+
+    # drop columns that are not for training anymore
+    df = df.drop(['ZIP_CODE', 'MUNICIPALITY_CODE'], axis=1)
+    return df
+
+
+def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
+    # impute CONSTRUCTION_YEAR and FLOOR with mean based on ZIP_AREA
+    df = groupby_mean_impute(df, 'ZIP_AREA', 'CONSTRUCTION_YEAR')
+    df = groupby_mean_impute(df, 'ZIP_AREA', 'FLOOR')
+
+    # impute REBUILDING_YEAR to be same as CONSTRUCTION_YEAR if it is missing
+    missing_rebuilding = df['REBUILDING_YEAR'].isna()
+    df.loc[missing_rebuilding, 'REBUILDING_YEAR'] = \
+        df.loc[missing_rebuilding, 'CONSTRUCTION_YEAR']
+
+    # impute AREA columns with 0
+    df[AREA_COLUMNS] = df[AREA_COLUMNS].fillna(0).values
+    return df
+
+
+def groupby_mean_impute(df: pd.DataFrame, groupby_col: str, impute_col: str) -> pd.DataFrame:
+    df[impute_col] = df[impute_col].astype(float)
+    df[impute_col] = df.groupby(groupby_col)[impute_col].transform(lambda x: x.fillna(x.mean()))
+    return df
+
+
+def remove_unused_columns(df: pd.DataFrame) -> pd.DataFrame:
+    # Remove some unused columns
+    drop_cols = [
+        'TRANSACTION_ID', 'BUILDING_ID', 'UNIT_ID',     # ID columns
+        'SQM_PRICE',                                    # pseudo-target column
+        'STREET_CODE'
+    ]
+    drop_cols = [x for x in drop_cols if x in df.columns]
+    df = df.drop(drop_cols, axis=1)
+    return df
+
+
+def transform_values(df: pd.DataFrame) -> pd.DataFrame:
+    for col in FACILITY_COLUMNS:
+        df[col] = df[col].apply(facility_clean)
+
+    df['FLOOR'] = df['FLOOR'].apply(transform_floor)
+    df['ZIP_AREA'] = df['ZIP_CODE'].apply(zip_code_mapper)
+    df['MUNICIPALITY'] = df['MUNICIPALITY_CODE'].apply(
+        municipality_code_mapper)
+    return df
