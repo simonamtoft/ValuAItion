@@ -32,7 +32,7 @@ python -m src.model.evaluate --run_id 6aeebe13-4ca0-456f-9476-a956f738e598 --sub
 List of to-do's, feel free to add new ones, or pick any of these up.
 - Implement config options for data processing
 - Implement hyperparameter optimization
-- Implement option to cast `PRICE` to `log_price` (stats trick)
+- Implement feature selection
 - Implement option to normalize numeric features
 - Implement option to reduce dimensionality of high dimension categorical features (`BUILDING_ID`, `UNIT_ID`, `STREET_CODE`)
 - Investigate better imputation methods

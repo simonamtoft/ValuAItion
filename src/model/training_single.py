@@ -23,14 +23,20 @@ def main():
 
     # load training data
     df_train = get_data('train')
+    df_train = df_train.astype('float32')
 
-    # load model configuration
+    # load model and data configuration
     with open('model_config.json', 'r') as f:
         model_config = json.load(f)
+    with open('data_config.json', 'r') as f:
+        data_config = json.load(f)
 
     # split into features and labels
     X = df_train.drop('PRICE', axis=1)
     y = df_train['PRICE'].values
+
+    if data_config['log_y']:
+        y = np.log(y)
 
     # store training features in list
     with open(os.path.join(model_dir, 'train_features.txt'), 'w') as f:

@@ -5,6 +5,7 @@ import click
 import joblib
 import logging
 import requests
+import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 from src.data.process import get_data
@@ -39,6 +40,10 @@ def compute_metrics(model_dir: str):
     if 'PRICE' in df_test.columns:
         X_test = df_test.drop('PRICE', axis=1)
 
+    # load data config
+    with open('data_config.json', 'r') as f:
+        data_config = json.load(f)
+
     # load feature names used for training
     with open(os.path.join(model_dir, 'train_features.txt'), 'r') as f:
         train_features = [x.strip() for x in f.readlines()]
@@ -64,8 +69,13 @@ def compute_metrics(model_dir: str):
     model = joblib.load(os.path.join(model_dir, 'model.pkl'))
 
     # predict
+    y_hat = model.predict(X_test)
+    if data_config['log_y']:
+        y_hat = np.exp(y_hat)
+
+    # format df_test
     df_test = df_test.reset_index(drop=False)
-    df_test['PRICE'] = model.predict(X_test)
+    df_test['PRICE'] = y_hat
     return df_test
 
 
