@@ -23,6 +23,15 @@ Run hyperparameter optimization with `optuna`:
 python -m src.model.training_optuna
 ```
 
+# To-Do List
+List of to-do's, feel free to add new ones, or pick any of these up.
+- Implement config options for data processing
+- Implement hyperparameter optimization
+- Implement option to cast `PRICE` to `log_price` (stats trick)
+- Implement option to normalize numeric features
+- Implement option to reduce dimensionality of high dimension categorical features (`BUILDING_ID`, `UNIT_ID`, `STREET_CODE`)
+- Investigate better imputation methods
+
 
 ## Other Resources
 - Danmarks statistik: https://www.dst.dk/en/Statistik/dokumentation/nomenklaturer/amt-kom
