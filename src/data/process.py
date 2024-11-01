@@ -44,21 +44,26 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def groupby_mean_impute(df: pd.DataFrame, groupby_col: str, impute_col: str) -> pd.DataFrame:
+def groupby_mean_impute(df: pd.DataFrame, groupby_col: str,
+                        impute_col: str) -> pd.DataFrame:
     df[impute_col] = df[impute_col].astype(float)
-    df[impute_col] = df.groupby(groupby_col)[impute_col].transform(lambda x: x.fillna(x.mean()))
+    df[impute_col] = df.groupby(groupby_col)[impute_col].transform(
+        lambda x: x.fillna(x.mean()))
     return df
 
 
 def remove_unused_columns(df: pd.DataFrame) -> pd.DataFrame:
     # Remove some unused columns
     drop_cols = [
-        'TRANSACTION_ID', 'BUILDING_ID', 'UNIT_ID',     # ID columns
+        'BUILDING_ID', 'UNIT_ID',     # ID columns
         'SQM_PRICE',                                    # pseudo-target column
         'STREET_CODE'
     ]
     drop_cols = [x for x in drop_cols if x in df.columns]
     df = df.drop(drop_cols, axis=1)
+
+    # set 'TRANSACTION_ID' to be the index
+    df = df.set_index('TRANSACTION_ID')
     return df
 
 
@@ -70,4 +75,5 @@ def transform_values(df: pd.DataFrame) -> pd.DataFrame:
     df['ZIP_AREA'] = df['ZIP_CODE'].apply(zip_code_mapper)
     df['MUNICIPALITY'] = df['MUNICIPALITY_CODE'].apply(
         municipality_code_mapper)
+    df['HAS_ELEVATOR'] = df['HAS_ELEVATOR'].astype('float16')
     return df
