@@ -1,3 +1,4 @@
 {
-    "log_y": true
+    "log_y": true,
+    "calculate_street_price_sqm": true
 }

@@ -1,3 +1,4 @@
+import json
 import os
 import pandas as pd
 from .transforms import zip_code_mapper, municipality_code_mapper, \
@@ -10,7 +11,7 @@ def get_data(split: str) -> pd.DataFrame:
     dataset_path = os.path.join(
         'datasets', f'Resights_Hackathon_Ejerlejligheder_{split.upper()}.csv')
     df = pd.read_csv(dataset_path, sep=',')
-    df = transform_values(df)
+    df = transform_values(df, split)
     df = handle_missing_values(df)
     df = remove_unused_columns(df)
 
@@ -62,7 +63,7 @@ def remove_unused_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def transform_values(df: pd.DataFrame) -> pd.DataFrame:
+def transform_values(df: pd.DataFrame, split: str) -> pd.DataFrame:
     for col in FACILITY_COLUMNS:
         df[col] = df[col].apply(facility_clean)
 
@@ -71,4 +72,25 @@ def transform_values(df: pd.DataFrame) -> pd.DataFrame:
     df['MUNICIPALITY'] = df['MUNICIPALITY_CODE'].apply(
         municipality_code_mapper)
     df['HAS_ELEVATOR'] = df['HAS_ELEVATOR'].astype('float16')
+
+    df = calculate_street_price_sqm(df, split)
+
+    return df
+
+
+def calculate_street_price_sqm(df: pd.DataFrame, split: str) -> pd.DataFrame:
+    with open('data_config.json', 'r') as f:
+        data_config = json.load(f)
+
+    if data_config["calculate_street_price_sqm"]:
+        # during train: calculate the average sqm price for each street code based off the entire dataset
+        if split == 'train':
+            street_mean_sqm_price = df.groupby("STREET_CODE")["SQM_PRICE"].mean()
+            street_mean_sqm_price.to_csv("street_code_mean_sqm_price.csv", header=True)
+        # during test: load the average sqm price for each street code from the train phase 
+        else:
+            street_mean_sqm_price = pd.read_csv("street_code_mean_sqm_price.csv", index_col="STREET_CODE").squeeze()
+        df["STREET_CODE_MEAN_SQM_PRICE"] = df["STREET_CODE"].map(street_mean_sqm_price)
+        df["STREET_CODE_MEAN_SQM_PRICE"] = df["STREET_CODE_MEAN_SQM_PRICE"].fillna(df["SQM_PRICE"].mean())
+        
     return df

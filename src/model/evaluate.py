@@ -39,7 +39,7 @@ def compute_metrics(model_dir: str):
     df_test = get_data('test')
     if 'PRICE' in df_test.columns:
         X_test = df_test.drop('PRICE', axis=1)
-
+    
     # load data config
     with open('data_config.json', 'r') as f:
         data_config = json.load(f)
