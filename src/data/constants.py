@@ -1,4 +1,5 @@
 DATA_DIR = 'datasets'
+MODEL_DIR = 'models'
 BASE_FILENAME = 'Resights_Hackathon_Ejerlejligheder'
 BASE_DATASET_URL = 'https://resights-hackathon.s3.eu-central-1.amazonaws.com/avm/ejerlejligheder'
 AREA_COLUMNS = [
