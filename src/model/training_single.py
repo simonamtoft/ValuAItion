@@ -21,8 +21,12 @@ def main():
     model_dir = os.path.join('models', run_id)
     Path(model_dir).mkdir(parents=True, exist_ok=True)
 
+    # load data config
+    with open('data_config.json', 'r') as f:
+        data_config = json.load(f)
+
     # load training data
-    df_train = get_data('train')
+    df_train = get_data('train', run_id, **data_config)
     df_train = df_train.astype('float32')
 
     # load model and data configuration
