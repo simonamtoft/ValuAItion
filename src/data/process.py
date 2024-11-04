@@ -13,7 +13,7 @@ def get_data(split: str, run_id: str, calculate_street_price_sqm: bool,
         'datasets', f'Resights_Hackathon_Ejerlejligheder_{split.upper()}.csv')
     df = pd.read_csv(dataset_path, sep=',')
     df = transform_values(df, split, run_id, calculate_street_price_sqm, reduce_zip, reduce_municipality)
-    df = handle_missing_values(df, split)
+    df = handle_missing_values(df, split, reduce_zip)
     df = remove_unused_columns(df)
 
     # expand TRADE_DATE to year, month, and day of week
@@ -28,10 +28,11 @@ def get_data(split: str, run_id: str, calculate_street_price_sqm: bool,
     return df
 
 
-def handle_missing_values(df: pd.DataFrame, split: str) -> pd.DataFrame:
-    # impute CONSTRUCTION_YEAR and FLOOR with mean based on ZIP_AREA
-    df = groupby_mean_impute(df, split, 'ZIP_AREA', 'CONSTRUCTION_YEAR')
-    df = groupby_mean_impute(df, split, 'ZIP_AREA', 'FLOOR')
+def handle_missing_values(df: pd.DataFrame, split: str, reduce_zip: bool) -> pd.DataFrame:
+    # impute CONSTRUCTION_YEAR and FLOOR with mean based on ZIP
+    zip_col = 'ZIP_AREA' if reduce_zip else 'ZIP_CODE'
+    df = groupby_mean_impute(df, split, zip_col, 'CONSTRUCTION_YEAR')
+    df = groupby_mean_impute(df, split, zip_col, 'FLOOR')
 
     # impute REBUILDING_YEAR to be same as CONSTRUCTION_YEAR if it is missing
     missing_rebuilding = df['REBUILDING_YEAR'].isna()
