@@ -7,12 +7,13 @@ from .constants import AREA_COLUMNS, FACILITY_COLUMNS, DROP_COLUMNS, \
 
 
 def get_data(split: str, run_id: str, calculate_street_price_sqm: bool,
+             reduce_zip: bool, reduce_municipality: bool,
              *args, **kwargs) -> pd.DataFrame:
     dataset_path = os.path.join(
         'datasets', f'Resights_Hackathon_Ejerlejligheder_{split.upper()}.csv')
     df = pd.read_csv(dataset_path, sep=',')
-    df = transform_values(df, split, run_id, calculate_street_price_sqm)
-    df = handle_missing_values(df)
+    df = transform_values(df, split, run_id, calculate_street_price_sqm, reduce_zip, reduce_municipality)
+    df = handle_missing_values(df, split)
     df = remove_unused_columns(df)
 
     # expand TRADE_DATE to year, month, and day of week
@@ -24,16 +25,13 @@ def get_data(split: str, run_id: str, calculate_street_price_sqm: bool,
 
     # one-hot encode columns
     df = pd.get_dummies(df, columns=CAT_COLUMNS, dtype='int8')
-
-    # drop columns that are not for training anymore
-    df = df.drop(['ZIP_CODE', 'MUNICIPALITY_CODE'], axis=1)
     return df
 
 
-def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
+def handle_missing_values(df: pd.DataFrame, split: str) -> pd.DataFrame:
     # impute CONSTRUCTION_YEAR and FLOOR with mean based on ZIP_AREA
-    df = groupby_mean_impute(df, 'ZIP_AREA', 'CONSTRUCTION_YEAR')
-    df = groupby_mean_impute(df, 'ZIP_AREA', 'FLOOR')
+    df = groupby_mean_impute(df, split, 'ZIP_AREA', 'CONSTRUCTION_YEAR')
+    df = groupby_mean_impute(df, split, 'ZIP_AREA', 'FLOOR')
 
     # impute REBUILDING_YEAR to be same as CONSTRUCTION_YEAR if it is missing
     missing_rebuilding = df['REBUILDING_YEAR'].isna()
@@ -45,7 +43,7 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def groupby_mean_impute(df: pd.DataFrame, groupby_col: str,
+def groupby_mean_impute(df: pd.DataFrame, split: str, groupby_col: str,
                         impute_col: str) -> pd.DataFrame:
     df[impute_col] = df[impute_col].astype(float)
     df[impute_col] = df.groupby(groupby_col)[impute_col].transform(
@@ -64,14 +62,24 @@ def remove_unused_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def transform_values(df: pd.DataFrame, split: str, run_id: str,
-                     calculate_street_price_sqm: bool) -> pd.DataFrame:
+                     calculate_street_price_sqm: bool, reduce_zip: bool,
+                     reduce_municipality: bool) -> pd.DataFrame:
+    # clean data
+    df['FLOOR'] = df['FLOOR'].apply(transform_floor)
     for col in FACILITY_COLUMNS:
         df[col] = df[col].apply(facility_clean)
 
-    df['FLOOR'] = df['FLOOR'].apply(transform_floor)
-    df['ZIP_AREA'] = df['ZIP_CODE'].apply(zip_code_mapper)
-    df['MUNICIPALITY'] = df['MUNICIPALITY_CODE'].apply(
-        municipality_code_mapper)
+    # reduce zip codes to areas
+    if reduce_zip:
+        df['ZIP_AREA'] = df['ZIP_CODE'].apply(zip_code_mapper)
+        df = df.drop('ZIP_CODE', axis=1)
+
+    # reduce municipality codes to areas
+    if reduce_municipality:
+        df['MUNICIPALITY'] = df['MUNICIPALITY_CODE'].apply(
+            municipality_code_mapper)
+
+    # ensure bool is converted to float
     df['HAS_ELEVATOR'] = df['HAS_ELEVATOR'].astype('float16')
 
     df = __calculate_street_price_sqm(df, split, run_id, calculate_street_price_sqm)

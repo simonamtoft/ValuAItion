@@ -1,4 +1,6 @@
 {
     "log_y": true,
-    "calculate_street_price_sqm": true
+    "calculate_street_price_sqm": true,
+    "reduce_zip": true,
+    "reduce_municipality": true
 }
