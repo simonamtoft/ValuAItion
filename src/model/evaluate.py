@@ -24,7 +24,7 @@ def main(run_id: str, submit: bool):
         df_test = pd.read_csv(save_path)
     else:
         logging.info('Compute predictions.')
-        df_test = compute_metrics(model_dir)
+        df_test = compute_metrics(model_dir, run_id)
         df_test.to_csv(save_path)
 
     if submit:
@@ -32,17 +32,17 @@ def main(run_id: str, submit: bool):
         upload_results(predictions, model_dir)
 
 
-def compute_metrics(model_dir: str):
+def compute_metrics(model_dir: str, run_id: str):
     device = get_device()
 
-    # load test data
-    df_test = get_data('test')
-    if 'PRICE' in df_test.columns:
-        X_test = df_test.drop('PRICE', axis=1)
-    
     # load data config
     with open('data_config.json', 'r') as f:
         data_config = json.load(f)
+
+    # load test data
+    df_test = get_data('test', run_id, **data_config)
+    if 'PRICE' in df_test.columns:
+        X_test = df_test.drop('PRICE', axis=1)
 
     # load feature names used for training
     with open(os.path.join(model_dir, 'train_features.txt'), 'r') as f:

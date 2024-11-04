@@ -1,17 +1,17 @@
-import json
 import os
 import pandas as pd
 from .transforms import zip_code_mapper, municipality_code_mapper, \
     transform_floor, facility_clean
 from .constants import AREA_COLUMNS, FACILITY_COLUMNS, DROP_COLUMNS, \
-    CAT_COLUMNS
+    CAT_COLUMNS, MODEL_DIR
 
 
-def get_data(split: str) -> pd.DataFrame:
+def get_data(split: str, run_id: str, calculate_street_price_sqm: bool,
+             *args, **kwargs) -> pd.DataFrame:
     dataset_path = os.path.join(
         'datasets', f'Resights_Hackathon_Ejerlejligheder_{split.upper()}.csv')
     df = pd.read_csv(dataset_path, sep=',')
-    df = transform_values(df, split)
+    df = transform_values(df, split, run_id, calculate_street_price_sqm)
     df = handle_missing_values(df)
     df = remove_unused_columns(df)
 
@@ -63,7 +63,8 @@ def remove_unused_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def transform_values(df: pd.DataFrame, split: str) -> pd.DataFrame:
+def transform_values(df: pd.DataFrame, split: str, run_id: str,
+                     calculate_street_price_sqm: bool) -> pd.DataFrame:
     for col in FACILITY_COLUMNS:
         df[col] = df[col].apply(facility_clean)
 
@@ -73,24 +74,25 @@ def transform_values(df: pd.DataFrame, split: str) -> pd.DataFrame:
         municipality_code_mapper)
     df['HAS_ELEVATOR'] = df['HAS_ELEVATOR'].astype('float16')
 
-    df = calculate_street_price_sqm(df, split)
+    df = __calculate_street_price_sqm(df, split, run_id, calculate_street_price_sqm)
 
     return df
 
 
-def calculate_street_price_sqm(df: pd.DataFrame, split: str) -> pd.DataFrame:
-    with open('data_config.json', 'r') as f:
-        data_config = json.load(f)
+def __calculate_street_price_sqm(df: pd.DataFrame, split: str, run_id: str,
+                                 calculate_street_price_sqm: bool) -> pd.DataFrame:
+    # simply return original DataFrame if option is disabled
+    if not calculate_street_price_sqm:
+        return df
 
-    if data_config["calculate_street_price_sqm"]:
-        # during train: calculate the average sqm price for each street code based off the entire dataset
-        if split == 'train':
-            street_mean_sqm_price = df.groupby("STREET_CODE")["SQM_PRICE"].mean()
-            street_mean_sqm_price.to_csv("street_code_mean_sqm_price.csv", header=True)
-        # during test: load the average sqm price for each street code from the train phase 
-        else:
-            street_mean_sqm_price = pd.read_csv("street_code_mean_sqm_price.csv", index_col="STREET_CODE").squeeze()
-        df["STREET_CODE_MEAN_SQM_PRICE"] = df["STREET_CODE"].map(street_mean_sqm_price)
-        df["STREET_CODE_MEAN_SQM_PRICE"] = df["STREET_CODE_MEAN_SQM_PRICE"].fillna(df["SQM_PRICE"].mean())
-        
+    # during train: calculate the average sqm price for each street code based off the entire dataset
+    file_path = os.path.join(MODEL_DIR, run_id, 'street_code_mean_sqm_price.csv')
+    if split == 'train':
+        street_mean_sqm_price = df.groupby("STREET_CODE")["SQM_PRICE"].mean()
+        street_mean_sqm_price.to_csv(file_path, header=True)
+    # during test: load the average sqm price for each street code from the train phase
+    else:
+        street_mean_sqm_price = pd.read_csv(file_path, index_col="STREET_CODE").squeeze()
+    df["STREET_CODE_MEAN_SQM_PRICE"] = df["STREET_CODE"].map(street_mean_sqm_price)
+    df["STREET_CODE_MEAN_SQM_PRICE"] = df["STREET_CODE_MEAN_SQM_PRICE"].fillna(df["SQM_PRICE"].mean())
     return df
