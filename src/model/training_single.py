@@ -69,7 +69,7 @@ def main():
     }
 
     # save model along with other stuff
-    logging.info('Saving run to %s', model_dir)
+    logging.info('Saving run with ID %s', run_id)
     joblib.dump(model, os.path.join(model_dir, 'model.pkl'))
     with open(os.path.join(model_dir, 'model_config.json'), 'w') as f:
         json.dump(model_config, f, indent=4)
