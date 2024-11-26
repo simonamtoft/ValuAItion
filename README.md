@@ -28,17 +28,5 @@ Evaluate resulting model and send to submission API with:
 python -m src.model.evaluate --run_id <INSERT RUN ID> --submit
 ```
 
-# To-Do List
-List of to-do's, feel free to add new ones, or pick any of these up.
-- Impute missing zip and street etc. using google api based on lat/lon coordinates.
-- Implement hyperparameter optimization
-- Implement feature selection
-- Implement option to normalize numeric features
-- Implement option to reduce dimensionality of high dimension categorical features (`BUILDING_ID`, `UNIT_ID`, `STREET_CODE`)
-- Investigate better imputation methods
-- Track experiments and save models with [weight and biases](https://wandb.ai/site/)
-- Deploy web application
-
-
-## Other Resources
+# Other Resources
 - Danmarks statistik: https://www.dst.dk/en/Statistik/dokumentation/nomenklaturer/amt-kom
