@@ -1,15 +1,12 @@
 import os
 import json
-import torch
 import click
-import joblib
 import logging
 import requests
-import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
-from src.data.process import get_data
-from src.model.utils import get_device
+from src.data.process import load_dataset
+from src.model.ValueModel import ValueModel
 
 
 @click.command()
@@ -24,7 +21,7 @@ def main(run_id: str, submit: bool):
         df_test = pd.read_csv(save_path)
     else:
         logging.info('Compute predictions.')
-        df_test = compute_metrics(model_dir, run_id)
+        df_test = compute_metrics(run_id)
         df_test.to_csv(save_path)
 
     if submit:
@@ -32,46 +29,10 @@ def main(run_id: str, submit: bool):
         upload_results(predictions, model_dir)
 
 
-def compute_metrics(model_dir: str, run_id: str):
-    device = get_device()
-
-    # load data config
-    with open('data_config.json', 'r') as f:
-        data_config = json.load(f)
-
-    # load test data
-    df_test = get_data('test', run_id, **data_config)
-    if 'PRICE' in df_test.columns:
-        X_test = df_test.drop('PRICE', axis=1)
-
-    # load feature names used for training
-    with open(os.path.join(model_dir, 'train_features.txt'), 'r') as f:
-        train_features = [x.strip() for x in f.readlines()]
-
-    # add missing features
-    missing_features = [x for x in train_features if x not in X_test.columns]
-    for feature in missing_features:
-        X_test.loc[:, feature] = 0
-
-    # remove extra features and reorder
-    X_test = X_test[train_features]
-
-    # scale features if applicable for model
-    scaler_path = os.path.join(model_dir, 'scaler.pkl')
-    if os.path.exists(scaler_path):
-        scaler = joblib.load(scaler_path)
-        X_test = scaler.transform(X_test)
-
-    # move data to device
-    X_test = torch.from_numpy(X_test.values).to(device)
-
-    # load model
-    model = joblib.load(os.path.join(model_dir, 'model.pkl'))
-
-    # predict
-    y_hat = model.predict(X_test)
-    if data_config['log_y']:
-        y_hat = np.exp(y_hat)
+def compute_metrics(run_id: str):
+    model = ValueModel(run_id)
+    df_test = load_dataset('test')
+    y_hat = model.predict(df_test)
 
     # format df_test
     df_test = df_test.reset_index(drop=False)

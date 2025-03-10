@@ -6,12 +6,15 @@ from .constants import AREA_COLUMNS, FACILITY_COLUMNS, DROP_COLUMNS, \
     CAT_COLUMNS, MODEL_DIR
 
 
-def get_data(split: str, run_id: str, calculate_street_price_sqm: bool,
-             reduce_zip: bool, reduce_municipality: bool,
-             *args, **kwargs) -> pd.DataFrame:
+def load_dataset(split: str) -> pd.DataFrame:
     dataset_path = os.path.join(
         'datasets', f'Resights_Hackathon_Ejerlejligheder_{split.upper()}.csv')
     df = pd.read_csv(dataset_path, sep=',')
+    return df
+
+
+def process_data(df: pd.DataFrame, split: str, run_id: str, calculate_street_price_sqm: bool,
+                 reduce_zip: bool, reduce_municipality: bool, *args, **kwargs) -> pd.DataFrame:
     df = transform_values(df, split, run_id, calculate_street_price_sqm, reduce_zip, reduce_municipality)
     df = handle_missing_values(df, split, reduce_zip)
     df = remove_unused_columns(df)
@@ -58,7 +61,7 @@ def remove_unused_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.drop(drop_cols, axis=1)
 
     # set 'TRANSACTION_ID' to be the index
-    df = df.set_index('TRANSACTION_ID')
+    # df = df.set_index('TRANSACTION_ID')
     return df
 
 
@@ -103,5 +106,5 @@ def __calculate_street_price_sqm(df: pd.DataFrame, split: str, run_id: str,
     else:
         street_mean_sqm_price = pd.read_csv(file_path, index_col="STREET_CODE").squeeze()
     df["STREET_CODE_MEAN_SQM_PRICE"] = df["STREET_CODE"].map(street_mean_sqm_price)
-    df["STREET_CODE_MEAN_SQM_PRICE"] = df["STREET_CODE_MEAN_SQM_PRICE"].fillna(df["SQM_PRICE"].mean())
+    df["STREET_CODE_MEAN_SQM_PRICE"] = df["STREET_CODE_MEAN_SQM_PRICE"].fillna(df["STREET_CODE_MEAN_SQM_PRICE"].mean())
     return df

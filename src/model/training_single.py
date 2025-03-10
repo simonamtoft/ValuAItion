@@ -9,7 +9,7 @@ from pathlib import Path
 from xgboost import XGBRegressor
 from sklearn.model_selection import train_test_split
 
-from src.data.process import get_data
+from src.data.process import load_dataset, process_data
 from src.model.utils import get_device
 
 
@@ -26,14 +26,13 @@ def main():
         data_config = json.load(f)
 
     # load training data
-    df_train = get_data('train', run_id, **data_config)
+    df_train = load_dataset('train')
+    df_train = process_data(df_train, 'train', run_id, **data_config)
     df_train = df_train.astype('float32')
 
-    # load model and data configuration
+    # load model configuration
     with open('model_config.json', 'r') as f:
         model_config = json.load(f)
-    with open('data_config.json', 'r') as f:
-        data_config = json.load(f)
 
     # split into features and labels
     X = df_train.drop('PRICE', axis=1)
