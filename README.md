@@ -30,3 +30,4 @@ python -m src.model.evaluate --run_id <INSERT RUN ID> --submit
 
 # Other Resources
 - Danmarks statistik: https://www.dst.dk/en/Statistik/dokumentation/nomenklaturer/amt-kom
+- Coastline and lake coordinates: https://www.naturalearthdata.com/downloads/10m-physical-vectors/
