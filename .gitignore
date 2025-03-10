@@ -5,6 +5,7 @@ __pycache__/
 model_config.json
 datasets/*
 models/*
+.python-version
 
 # C extensions
 *.so
