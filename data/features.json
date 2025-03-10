@@ -1,0 +1,88 @@
+[
+    {
+        "id": "FLOOR",
+        "type": "number"
+    }, {
+        "id": "MUNICIPALITY_CODE",
+        "type": "number"
+    }, {
+        "id": "ZIP_CODE",
+        "type": "number"
+    }, {
+        "id": "STREET_CODE",
+        "type": "number"
+    }, {
+        "id": "TRADE_DATE",
+        "type": "date"
+    }, {
+        "id": "CONSTRUCTION_YEAR",
+        "type": "date_year"
+    }, {
+        "id": "REBUILDING_YEAR",
+        "type": "date_year"
+    }, {
+        "id": "AREA_TINGLYST",
+        "type": "number"
+    }, {
+        "id": "AREA_RESIDENTIAL",
+        "type": "number"
+    }, {
+        "id": "AREA_OTHER",
+        "type": "number"
+    }, {
+        "id": "AREA_COMMON_ACCESS_SHARE",
+        "type": "number"
+    }, {
+        "id": "AREA_CLOSED_COVER_OUTHOUSE",
+        "type": "number"
+    }, {
+        "id": "AREA_OPEN_BALCONY_ROOFTOP",
+        "type": "number"
+    }, {
+        "id": "NUMBER_ROOMS",
+        "type": "number"
+    }, {
+        "id": "FACILITIES_TOILET",
+        "type": "category",
+        "values": [
+            "T: Vandskyllende toilet i enheden",
+            "A: Vandskyllende toilet uden for enheden",
+            "G: Fast kogeinstallation i værelse eller på gang"
+        ]
+    }, {
+        "id": "FACILITIES_SHOWER",
+        "type": "category",
+        "values": [
+            "V: Badeværelser i enheden",
+            "D: Hverken badeværelse eller adgang til badeværelse",
+            "C: Adgang til badeværelse"
+        ]
+    }, {
+        "id": "FACILITIES_KITCHEN",
+        "type": "category",
+        "values": [
+            "E: Eget køkken med afløb",
+            "G: Fast kogeinstallation i værelse eller på gang",
+            "F: Adgang til fælles køkken",
+            "H: Ingen fast kogeinstallation"
+        ]
+    }, {
+        "id": "HAS_ELEVATOR",
+        "type": "boolean"
+    }, {
+        "id": "LNG",
+        "type": "number"
+    }, {
+        "id": "LAT",
+        "type": "number"
+    }, {
+        "id": "DISTANCE_LAKE",
+        "type": "number"
+    }, {
+        "id": "DISTANCE_HARBOUR",
+        "type": "number"
+    }, {
+        "id": "DISTANCE_COAST",
+        "type": "number"
+    }
+]
