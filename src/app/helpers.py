@@ -5,7 +5,7 @@ from datetime import date
 
 
 def setup_input_fields():
-    with open('features.json', 'r') as f:
+    with open('data/features.json', 'r') as f:
         features = json.load(f)
 
     # setup inputs
