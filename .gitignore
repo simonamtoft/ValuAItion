@@ -6,6 +6,7 @@ model_config.json
 datasets/*
 models/*
 .python-version
+tester.ipynb
 
 # C extensions
 *.so
